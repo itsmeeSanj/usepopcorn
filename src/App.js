@@ -52,16 +52,24 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
+const KEY = "f84fc31d";
+
 export default function App() {
   const [query, setQuery] = React.useState("");
-  const [movies, setMovies] = React.useState(tempMovieData);
-  const [watched, setWatched] = React.useState(tempWatchedData);
+  const [movies, setMovies] = React.useState([]);
+  const [watched, setWatched] = React.useState([]);
+
+  React.useEffect(() => {
+    fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`)
+      .then((res) => res.json())
+      .then((data) => setMovies(data));
+  }, [query]);
 
   return (
     <>
       <Header>
         <Search query={query} setQuery={setQuery} />
-        <NumResults>{movies.length}</NumResults>
+        <NumResults>{movies ? movies?.Search?.length : 0}</NumResults>
       </Header>
 
       <Main>
@@ -203,7 +211,7 @@ function NumResults({ children }) {
 function MovieList({ movies }) {
   return (
     <ul className='list'>
-      {movies?.map((movie) => (
+      {movies?.Search?.map((movie) => (
         <Movie movie={movie} key={movie.imdbID} />
       ))}
     </ul>
