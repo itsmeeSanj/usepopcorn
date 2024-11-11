@@ -62,10 +62,13 @@ export default function App() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, SetError] = React.useState("");
 
+  React.useEffect(function () {}, []);
+
   React.useEffect(() => {
     async function fetchMovies() {
       try {
         setIsLoading(true);
+        SetError("");
         const res = await fetch(
           `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
         );
@@ -84,6 +87,12 @@ export default function App() {
         setIsLoading(false);
       }
     }
+    if (query.length < 3) {
+      setMovies([]);
+      SetError("");
+      return;
+    }
+
     fetchMovies();
   }, [query]);
 
