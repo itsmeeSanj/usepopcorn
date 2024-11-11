@@ -55,7 +55,7 @@ const average = (arr) =>
 const KEY = "f84fc31d";
 
 export default function App() {
-  const [query, setQuery] = React.useState("movies");
+  const [query, setQuery] = React.useState("z");
   const [movies, setMovies] = React.useState([]);
   const [watched, setWatched] = React.useState([]);
 
@@ -69,14 +69,17 @@ export default function App() {
         const res = await fetch(
           `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
         );
-        if (!res.ok)
+
+        if (!res.ok) {
           throw new Error("Something went wrong while fetching movies!");
+        }
 
         const data = await res.json();
+        if (data?.Response === "False") throw new Error("Movie Not Found!");
+
         setMovies(data);
-      } catch (err) {
-        console.log(err.message);
-        SetError(err.message);
+      } catch (error) {
+        SetError(error.message);
       } finally {
         setIsLoading(false);
       }
@@ -97,9 +100,9 @@ export default function App() {
 
         {/* component composition */}
         <Box>
+          {isLoading && <Loader />}
           {!isLoading && !error && <MovieList movies={movies} />}
           {error && <ErrorMessage message={error} />}
-          {isLoading && <Loader />}
         </Box>
 
         <Box>
@@ -112,10 +115,10 @@ export default function App() {
 }
 
 function Loader() {
-  return <>its Loading</>;
+  return <p className='loader'>Loading...</p>;
 }
 
-function ErrorMessage(message) {
+function ErrorMessage({ message }) {
   return (
     <p className='error'>
       <span>⛔</span>
