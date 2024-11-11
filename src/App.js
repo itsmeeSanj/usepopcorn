@@ -55,14 +55,22 @@ const average = (arr) =>
 const KEY = "f84fc31d";
 
 export default function App() {
-  const [query, setQuery] = React.useState("z");
+  const [query, setQuery] = React.useState("");
   const [movies, setMovies] = React.useState([]);
   const [watched, setWatched] = React.useState([]);
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, SetError] = React.useState("");
 
-  React.useEffect(function () {}, []);
+  const [selectedId, setSelectedId] = React.useState(null);
+
+  function handleSelectMovie(id) {
+    setSelectedId((curId) => (id === curId ? null : id));
+  }
+
+  function handleCloseMovie(id) {
+    setSelectedId(null);
+  }
 
   React.useEffect(() => {
     async function fetchMovies() {
@@ -110,13 +118,24 @@ export default function App() {
         {/* component composition */}
         <Box>
           {isLoading && <Loader />}
-          {!isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && (
+            <MovieList movies={movies} onSelectedMovie={handleSelectMovie} />
+          )}
           {error && <ErrorMessage message={error} />}
         </Box>
 
         <Box>
-          <WatchedSummary watched={watched} />
-          <WatchMovie watched={watched} />
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseMovie={handleCloseMovie}
+            />
+          ) : (
+            <>
+              <WatchedSummary watched={watched} />
+              <WatchMovie watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
@@ -159,6 +178,18 @@ function Box({ children }) {
       </button>
 
       {isOpen && children}
+    </div>
+  );
+}
+
+function MovieDetails({ selectedId, onCloseMovie }) {
+  return (
+    <div className='details'>
+      <button className='btn-back' onClick={() => onCloseMovie()}>
+        &larr;
+      </button>
+
+      {selectedId}
     </div>
   );
 }
@@ -254,19 +285,23 @@ function NumResults({ children }) {
   );
 }
 
-function MovieList({ movies }) {
+function MovieList({ movies, onSelectedMovie }) {
   return (
-    <ul className='list'>
+    <ul className='list list-movies'>
       {movies?.Search?.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} />
+        <Movie
+          movie={movie}
+          key={movie.imdbID}
+          onSelectedMovie={onSelectedMovie}
+        />
       ))}
     </ul>
   );
 }
 
-function Movie({ movie }) {
+function Movie({ movie, onSelectedMovie }) {
   return (
-    <li key={movie.imdbID}>
+    <li key={movie.imdbID} onClick={() => onSelectedMovie(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
