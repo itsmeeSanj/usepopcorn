@@ -26,6 +26,10 @@ export default function App() {
     setSelectedId(null);
   }
 
+  function handleAddMovie(movie) {
+    setWatched((watched) => [...watched, movie]);
+  }
+
   React.useEffect(() => {
     async function fetchMovies() {
       try {
@@ -86,6 +90,7 @@ export default function App() {
               isLoading={isLoading}
               setIsLoading={setIsLoading}
               error={error}
+              onAddWatchMovie={handleAddMovie}
             />
           ) : (
             <>
@@ -145,6 +150,7 @@ function MovieDetails({
   setIsLoading,
   isLoading,
   error,
+  onAddWatchMovie,
 }) {
   const [movieDetail, setMovieDetail] = React.useState({});
 
@@ -166,7 +172,7 @@ function MovieDetails({
   React.useEffect(() => {
     async function loadMovieDetails() {
       try {
-        setIsLoading(true);
+        // setIsLoading(true);
         const res = await fetch(
           `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
         );
@@ -175,14 +181,27 @@ function MovieDetails({
       } catch (error) {
         console.log(error.message);
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
 
     loadMovieDetails();
-  }, [selectedId]);
+  }, [selectedId, setIsLoading]);
 
-  console.log("movieDetails", movieDetail);
+  function handleAdd() {
+    const newWacthedMovie = {
+      imdbID: selectedId,
+      title,
+      year,
+      poster,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runtime.split(" ").at(0)),
+    };
+
+    onAddWatchMovie(newWacthedMovie);
+    onCloseMovie();
+  }
+
   return isLoading ? (
     <Loader />
   ) : (
@@ -207,6 +226,9 @@ function MovieDetails({
       <section>
         <div className='rating'>
           <StarRating maxRating={10} />
+          <button className='btn-add' onClick={handleAdd}>
+            Add to list
+          </button>
         </div>
 
         <p>
@@ -261,8 +283,8 @@ function WatchMovie({ watched }) {
 function WatchMovieList({ movie }) {
   return (
     <li key={movie.imdbID}>
-      <img src={movie.Poster} alt={`${movie.Title} poster`} />
-      <h3>{movie.Title}</h3>
+      <img src={movie.poster} alt={`${movie.title} poster`} />
+      <h3>{movie.title}</h3>
       <div>
         <p>
           <span>⭐️</span>
