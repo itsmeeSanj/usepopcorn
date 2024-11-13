@@ -35,12 +35,15 @@ export default function App() {
   }
 
   React.useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchMovies() {
       try {
         setIsLoading(true);
         SetError("");
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+          { signal: controller.signal }
         );
 
         if (!res.ok) {
@@ -51,8 +54,11 @@ export default function App() {
         if (data?.Response === "False") throw new Error("Movie Not Found!");
 
         setMovies(data);
+        SetError("");
       } catch (error) {
-        SetError(error.message);
+        if (error.name !== "AbortError") {
+          SetError(error.message);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -64,6 +70,10 @@ export default function App() {
     }
 
     fetchMovies();
+
+    return function () {
+      controller.abort();
+    };
   }, [query]);
 
   return (
@@ -156,8 +166,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchMovie, watched }) {
   const [movieDetail, setMovieDetail] = React.useState({});
   const [isLoading, setIsLoading] = React.useState(false);
   const [userRating, setUserRating] = React.useState("");
-
-  // console.log("watched", watched);
 
   const isWatched = watched.map((watch) => watch.imdbID).includes(selectedId);
   const watchUserRating = watched.find(
