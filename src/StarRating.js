@@ -26,9 +26,15 @@ export default function StarRating({
   defaultSize = 18,
   messages = [],
   defaultRating = 0,
+  onSetRating,
 }) {
   const [selectStar, setSelectStar] = React.useState(defaultRating);
   const [tempRating, setTempRating] = React.useState(0);
+
+  function handleRating(rating) {
+    setSelectStar(rating);
+    onSetRating(rating);
+  }
 
   const textStyle = {
     lineHeight: "1",
@@ -44,9 +50,7 @@ export default function StarRating({
           <Star
             key={i}
             isFull={tempRating ? tempRating >= i + 1 : selectStar >= i + 1}
-            onRate={() => {
-              setSelectStar(i + 1);
-            }}
+            onRate={() => handleRating(i + 1)}
             onHoverIn={() => setTempRating(i + 1)}
             onHoverOut={() => setTempRating(0)}
             color={color}
