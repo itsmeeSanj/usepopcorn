@@ -9,7 +9,7 @@ const average = (arr) =>
 const KEY = "f84fc31d";
 
 export default function App() {
-  const [query, setQuery] = React.useState("movies");
+  const [query, setQuery] = React.useState("");
   const [movies, setMovies] = React.useState([]);
   const [watched, setWatched] = React.useState([]);
 
@@ -69,6 +69,7 @@ export default function App() {
       return;
     }
 
+    handleCloseMovie();
     fetchMovies();
 
     return function () {
@@ -76,10 +77,15 @@ export default function App() {
     };
   }, [query]);
 
+  function handleSearchQuery(e) {
+    setQuery(e.target.value);
+    handleCloseMovie();
+  }
+
   return (
     <>
       <Header>
-        <Search query={query} setQuery={setQuery} />
+        <Search query={query} onSearchQuery={handleSearchQuery} />
         <NumResults>{movies ? movies?.Search?.length : 0}</NumResults>
       </Header>
 
@@ -204,6 +210,25 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchMovie, watched }) {
 
     loadMovieDetails();
   }, [selectedId]);
+
+  // close modal using esc key
+  React.useEffect(
+    function () {
+      function ESC(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      }
+      document.addEventListener("keydown", ESC);
+
+      // cleanUp
+      return function () {
+        document.removeEventListener("keydown", ESC);
+      };
+    },
+
+    [onCloseMovie]
+  );
 
   React.useEffect(
     function () {
@@ -355,14 +380,14 @@ function WatchMovieList({ movie, onHandleRemove }) {
   );
 }
 
-function Search({ query, setQuery }) {
+function Search({ query, onSearchQuery }) {
   return (
     <input
       className='search'
       type='text'
       placeholder='Search movies...'
       value={query}
-      onChange={(e) => setQuery(e.target.value)}
+      onChange={(e) => onSearchQuery(e)}
     />
   );
 }
