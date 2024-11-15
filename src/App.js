@@ -11,12 +11,15 @@ const KEY = "f84fc31d";
 export default function App() {
   const [query, setQuery] = React.useState("");
   const [movies, setMovies] = React.useState([]);
-  const [watched, setWatched] = React.useState([]);
-
+  // const [watched, setWatched] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, SetError] = React.useState("");
-
   const [selectedId, setSelectedId] = React.useState(null);
+
+  const [watched, setWatched] = React.useState(function () {
+    const storedWatchMovie = localStorage.getItem("watchedMovies");
+    return JSON.parse(storedWatchMovie); // because we have used stringify while setting items in localStorage
+  });
 
   function handleSelectMovie(id) {
     setSelectedId((curId) => (id === curId ? null : id));
@@ -28,11 +31,22 @@ export default function App() {
 
   function handleAddMovie(movie) {
     setWatched((watched) => [...watched, movie]);
+
+    // add localStorage
+    // localStorage.setItem("watchedMovies", JSON.stringify([...watched, movie]));
   }
 
   function handleRemoveWatchMovie(ID) {
     setWatched((movies) => movies.filter((movie) => movie.imdbID !== ID));
   }
+
+  // localStorage
+  React.useEffect(
+    function () {
+      localStorage.setItem("watchedMovies", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   React.useEffect(() => {
     const controller = new AbortController();
