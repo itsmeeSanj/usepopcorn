@@ -32,7 +32,6 @@ export default function App() {
   function handleAddMovie(movie) {
     setWatched((watched) => [...watched, movie]);
 
-    // add localStorage
     // localStorage.setItem("watchedMovies", JSON.stringify([...watched, movie]));
   }
 
@@ -99,7 +98,11 @@ export default function App() {
   return (
     <>
       <Header>
-        <Search query={query} onSearchQuery={handleSearchQuery} />
+        <Search
+          query={query}
+          setQuery={setQuery}
+          onSearchQuery={handleSearchQuery}
+        />
         <NumResults>{movies ? movies?.Search?.length : 0}</NumResults>
       </Header>
 
@@ -394,7 +397,30 @@ function WatchMovieList({ movie, onHandleRemove }) {
   );
 }
 
-function Search({ query, onSearchQuery }) {
+function Search({ query, onSearchQuery, setQuery }) {
+  const inputEl = React.useRef(null);
+
+  React.useEffect(
+    function () {
+      // console.log(inputEl.current);
+      function callback(e) {
+        if (document.activeElement === inputEl.current) {
+          return;
+        }
+
+        // enter focus
+        if (e.code === "Enter") {
+          inputEl.current.focus();
+          setQuery("");
+        }
+      }
+
+      document.addEventListener("keydown", callback);
+      return () => document.addEventListener("keydown", callback);
+    },
+    [setQuery]
+  );
+
   return (
     <input
       className='search'
@@ -402,6 +428,7 @@ function Search({ query, onSearchQuery }) {
       placeholder='Search movies...'
       value={query}
       onChange={(e) => onSearchQuery(e)}
+      ref={inputEl}
     />
   );
 }
