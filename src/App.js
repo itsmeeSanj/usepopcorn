@@ -190,6 +190,8 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchMovie, watched }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [userRating, setUserRating] = React.useState("");
 
+  const countRef = React.useRef(0);
+
   const isWatched = watched.map((watch) => watch.imdbID).includes(selectedId);
   const watchUserRating = watched.find(
     (movie) => movie.imdbID === selectedId
@@ -208,6 +210,22 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchMovie, watched }) {
     Director: director,
     Genre: genre,
   } = movieDetail;
+
+  function handleAdd() {
+    const newWacthedMovie = {
+      imdbID: selectedId,
+      title,
+      year,
+      poster,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runtime.split(" ").at(0)),
+      userRating,
+      countRatingDecisions: countRef.current,
+    };
+
+    onAddWatchMovie(newWacthedMovie);
+    onCloseMovie();
+  }
 
   React.useEffect(() => {
     async function loadMovieDetails() {
@@ -259,20 +277,12 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchMovie, watched }) {
     [title]
   );
 
-  function handleAdd() {
-    const newWacthedMovie = {
-      imdbID: selectedId,
-      title,
-      year,
-      poster,
-      imdbRating: Number(imdbRating),
-      runtime: Number(runtime.split(" ").at(0)),
-      userRating,
-    };
-
-    onAddWatchMovie(newWacthedMovie);
-    onCloseMovie();
-  }
+  React.useEffect(
+    function () {
+      if (userRating) countRef.current = countRef.current++;
+    },
+    [userRating]
+  );
 
   return (
     <>
