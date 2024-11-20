@@ -1,5 +1,6 @@
 import React from "react";
 import StarRating from "./StarRating";
+import { useMovies } from "./useMovies";
 
 // element - explict props
 
@@ -10,16 +11,20 @@ const KEY = "f84fc31d";
 
 export default function App() {
   const [query, setQuery] = React.useState("");
-  const [movies, setMovies] = React.useState([]);
-  // const [watched, setWatched] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, SetError] = React.useState("");
+  const { movies, isLoading, error } = useMovies(query);
   const [selectedId, setSelectedId] = React.useState(null);
 
   const [watched, setWatched] = React.useState(function () {
     const storedWatchMovie = localStorage.getItem("watchedMovies");
     return JSON.parse(storedWatchMovie); // because we have used stringify while setting items in localStorage
   });
+
+  React.useEffect(
+    function () {
+      localStorage.setItem("watchedMovies", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   function handleSelectMovie(id) {
     setSelectedId((curId) => (id === curId ? null : id));
@@ -46,49 +51,6 @@ export default function App() {
     },
     [watched]
   );
-
-  React.useEffect(() => {
-    const controller = new AbortController();
-
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        SetError("");
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-          { signal: controller.signal }
-        );
-
-        if (!res.ok) {
-          throw new Error("Something went wrong while fetching movies!");
-        }
-
-        const data = await res.json();
-        if (data?.Response === "False") throw new Error("Movie Not Found!");
-
-        setMovies(data);
-        SetError("");
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          SetError(error.message);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    if (query.length < 3) {
-      setMovies([]);
-      SetError("");
-      return;
-    }
-
-    handleCloseMovie();
-    fetchMovies();
-
-    return function () {
-      controller.abort();
-    };
-  }, [query]);
 
   function handleSearchQuery(e) {
     setQuery(e.target.value);
@@ -125,7 +87,6 @@ export default function App() {
               selectedId={selectedId}
               onCloseMovie={handleCloseMovie}
               isLoading={isLoading}
-              setIsLoading={setIsLoading}
               error={error}
               onAddWatchMovie={handleAddMovie}
               watched={watched}
