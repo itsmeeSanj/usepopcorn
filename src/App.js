@@ -1,6 +1,7 @@
 import React from "react";
 import StarRating from "./StarRating";
-import { useMovies } from "./useMovies";
+import { useMovies } from "./customHooks/useMovies";
+import { useLocalStorage } from "./customHooks/useLocalStorage";
 
 // element - explict props
 
@@ -11,20 +12,9 @@ const KEY = "f84fc31d";
 
 export default function App() {
   const [query, setQuery] = React.useState("");
-  const { movies, isLoading, error } = useMovies(query, handleCloseMovie); //custom hooks
   const [selectedId, setSelectedId] = React.useState(null);
-
-  const [watched, setWatched] = React.useState(function () {
-    const storedWatchMovie = localStorage.getItem("watchedMovies");
-    return JSON.parse(storedWatchMovie); // because we have used stringify while setting items in localStorage
-  });
-
-  React.useEffect(
-    function () {
-      localStorage.setItem("watchedMovies", JSON.stringify(watched));
-    },
-    [watched]
-  );
+  const { movies, isLoading, error } = useMovies(query, handleCloseMovie); //custom hooks
+  const [watched, setWatched] = useLocalStorage([], "watchedMovies");
 
   function handleSelectMovie(id) {
     setSelectedId((curId) => (id === curId ? null : id));
@@ -43,14 +33,6 @@ export default function App() {
   function handleRemoveWatchMovie(ID) {
     setWatched((movies) => movies.filter((movie) => movie.imdbID !== ID));
   }
-
-  // localStorage
-  React.useEffect(
-    function () {
-      localStorage.setItem("watchedMovies", JSON.stringify(watched));
-    },
-    [watched]
-  );
 
   function handleSearchQuery(e) {
     setQuery(e.target.value);
