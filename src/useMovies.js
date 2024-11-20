@@ -1,9 +1,8 @@
 import React from "react";
 
-export function useMovies(query) {
-  const KEY = "f84fc31d";
+const KEY = "f84fc31d";
+export function useMovies(query, callback) {
   const [movies, setMovies] = React.useState([]);
-  // const [watched, setWatched] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, SetError] = React.useState("");
   // localStorage
@@ -11,6 +10,7 @@ export function useMovies(query) {
   React.useEffect(() => {
     const controller = new AbortController();
 
+    callback?.();
     async function fetchMovies() {
       try {
         setIsLoading(true);
@@ -43,7 +43,6 @@ export function useMovies(query) {
       return;
     }
 
-    // handleCloseMovie();
     fetchMovies();
 
     return function () {

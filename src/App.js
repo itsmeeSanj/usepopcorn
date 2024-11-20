@@ -11,7 +11,7 @@ const KEY = "f84fc31d";
 
 export default function App() {
   const [query, setQuery] = React.useState("");
-  const { movies, isLoading, error } = useMovies(query);
+  const { movies, isLoading, error } = useMovies(query, handleCloseMovie); //custom hooks
   const [selectedId, setSelectedId] = React.useState(null);
 
   const [watched, setWatched] = React.useState(function () {
