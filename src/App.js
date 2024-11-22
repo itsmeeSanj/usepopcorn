@@ -3,6 +3,7 @@ import StarRating from "./StarRating";
 import { useMovies } from "./customHooks/useMovies";
 import { useLocalStorage } from "./customHooks/useLocalStorage";
 import { useKey } from "./customHooks/useKey";
+import Geolocation from "./Geolocation";
 
 // element - explict props
 
@@ -42,20 +43,16 @@ export default function App() {
 
   return (
     <>
-      <Header>
+      {/* <Header>
         <Search
           query={query}
           setQuery={setQuery}
           onSearchQuery={handleSearchQuery}
         />
         <NumResults>{movies ? movies?.Search?.length : 0}</NumResults>
-      </Header>
+      </Header> */}
 
-      <Main>
-        {/* explicit props */}
-        {/* <Box element={<MovieList movies={movies} />} /> */}
-
-        {/* component composition */}
+      {/* <Main>
         <Box>
           {isLoading && <Loader />}
           {!isLoading && !error && (
@@ -84,7 +81,9 @@ export default function App() {
             </>
           )}
         </Box>
-      </Main>
+      </Main> */}
+
+      <Geolocation />
     </>
   );
 }
