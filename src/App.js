@@ -2,6 +2,7 @@ import React from "react";
 import StarRating from "./StarRating";
 import { useMovies } from "./customHooks/useMovies";
 import { useLocalStorage } from "./customHooks/useLocalStorage";
+import { useKey } from "./customHooks/useKey";
 
 // element - explict props
 
@@ -170,6 +171,8 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchMovie, watched }) {
     onCloseMovie();
   }
 
+  useKey(onCloseMovie, "Escape"); // hooks
+
   React.useEffect(() => {
     async function loadMovieDetails() {
       try {
@@ -188,25 +191,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchMovie, watched }) {
 
     loadMovieDetails();
   }, [selectedId]);
-
-  // close modal using esc key
-  React.useEffect(
-    function () {
-      function ESC(e) {
-        if (e.code === "Escape") {
-          onCloseMovie();
-        }
-      }
-      document.addEventListener("keydown", ESC);
-
-      // cleanUp
-      return function () {
-        document.removeEventListener("keydown", ESC);
-      };
-    },
-
-    [onCloseMovie]
-  );
 
   React.useEffect(
     function () {
@@ -353,26 +337,15 @@ function WatchMovieList({ movie, onHandleRemove }) {
 function Search({ query, onSearchQuery, setQuery }) {
   const inputEl = React.useRef(null);
 
-  React.useEffect(
-    function () {
-      // console.log(inputEl.current);
-      function callback(e) {
-        if (document.activeElement === inputEl.current) {
-          return;
-        }
+  useKey(function () {
+    if (document.activeElement === inputEl.current) {
+      return;
+    }
+    inputEl.current.focus();
+    setQuery("");
+  }, "Enter");
 
-        // enter focus
-        if (e.code === "Enter") {
-          inputEl.current.focus();
-          setQuery("");
-        }
-      }
-
-      document.addEventListener("keydown", callback);
-      return () => document.addEventListener("keydown", callback);
-    },
-    [setQuery]
-  );
+  // can be added custom callback function
 
   return (
     <input
